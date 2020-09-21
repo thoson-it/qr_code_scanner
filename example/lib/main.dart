@@ -29,22 +29,34 @@ class _QRViewExampleState extends State<QRViewExample> {
     return Scaffold(
       body: Column(
         children: <Widget>[
-          Expanded(
-            flex: 4,
-            child: QRView(
-              key: qrKey,
-              onQRViewCreated: _onQRViewCreated,
-              overlay: QrScannerOverlayShape(
-                borderColor: Colors.red,
-                borderRadius: 10,
-                borderLength: 30,
-                borderWidth: 10,
-                cutOutSize: 300,
-              ),
+          Container(
+            height: 400,
+            child: Stack(
+              children: [
+                QRView(
+                  key: qrKey,
+                  onQRViewCreated: _onQRViewCreated,
+                  // overlay: QrScannerOverlayShape(
+                  //   borderColor: Colors.red,
+                  //   borderRadius: 10,
+                  //   borderLength: 30,
+                  //   borderWidth: 10,
+                  //   cutOutSize: 300,
+                  // ),
+                ),
+                Positioned(
+                  top: barcodeData?.minY ?? 0,
+                  left: barcodeData?.minX ?? 0,
+                  child: Container(
+                    height: barcodeData?.height ?? 0,
+                    width: barcodeData?.width ?? 0,
+                    color: Colors.red,
+                  ),
+                )
+              ],
             ),
           ),
           Expanded(
-            flex: 1,
             child: FittedBox(
               fit: BoxFit.contain,
               child: Column(
@@ -140,12 +152,38 @@ class _QRViewExampleState extends State<QRViewExample> {
     return backCamera == current;
   }
 
+  BarcodeData barcodeData;
+
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
+      print('SonLT $scanData');
       setState(() {
-        qrText = scanData;
+        barcodeData = null;
+        qrText = '';
       });
+      if (scanData is List) {
+        // print('ScanData $scanData');
+        final first = scanData.first;
+        // print('First $first');
+        if (first != null) {
+          setState(() {
+            barcodeData =
+                BarcodeData.fromJson(Map<String, dynamic>.from(first));
+            qrText = barcodeData.code;
+          });
+        } else {
+          setState(() {
+            barcodeData = null;
+            qrText = '';
+          });
+        }
+      } else {
+        setState(() {
+          barcodeData = null;
+          qrText = '';
+        });
+      }
     });
   }
 
@@ -154,4 +192,52 @@ class _QRViewExampleState extends State<QRViewExample> {
     controller.dispose();
     super.dispose();
   }
+}
+
+class BarcodeData {
+  BarcodeData({
+    this.height,
+    this.width,
+    this.minX,
+    this.code,
+    this.midX,
+    this.minY,
+    this.midY,
+    this.maxY,
+    this.maxX,
+  });
+
+  double height;
+  double width;
+  double minX;
+  String code;
+  double midX;
+  double minY;
+  double midY;
+  double maxY;
+  double maxX;
+
+  factory BarcodeData.fromJson(Map<String, dynamic> json) => BarcodeData(
+        height: json["height"]?.toDouble() ?? 0,
+        width: json["width"]?.toDouble() ?? 0,
+        minX: json["minX"]?.toDouble() ?? 0,
+        code: json["code"],
+        midX: json["midX"]?.toDouble() ?? 0,
+        minY: json["minY"]?.toDouble() ?? 0,
+        midY: json["midY"]?.toDouble() ?? 0,
+        maxY: json["maxY"]?.toDouble() ?? 0,
+        maxX: json["maxX"]?.toDouble() ?? 0,
+      );
+
+  Map<String, dynamic> toJson() => {
+        "height": height,
+        "width": width,
+        "minX": minX,
+        "code": code,
+        "midX": midX,
+        "minY": minY,
+        "midY": midY,
+        "maxY": maxY,
+        "maxX": maxX,
+      };
 }
