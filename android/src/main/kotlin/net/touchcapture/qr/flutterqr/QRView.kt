@@ -132,6 +132,7 @@ class QRView(private val registrar: PluginRegistry.Registrar, id: Int) :
 //        barcode.framingRectSize = Size(width, height)
         val formats = listOf(BarcodeFormat.EAN_13, BarcodeFormat.UPC_A)
         barcode.decoderFactory = DefaultDecoderFactory(formats)
+        barcode.framingRectSize = Size(1000, 2000)
         barcode.decodeContinuous(
                 object : BarcodeCallback {
                     override fun barcodeResult(result: BarcodeResult) {
