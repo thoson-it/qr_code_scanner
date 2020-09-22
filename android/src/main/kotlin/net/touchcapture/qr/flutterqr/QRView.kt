@@ -10,8 +10,11 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import com.google.zxing.BarcodeFormat
 import com.google.zxing.ResultPoint
 import android.hardware.Camera.CameraInfo
+import com.journeyapps.barcodescanner.DefaultDecoderFactory
+import com.journeyapps.barcodescanner.DecoratedBarcodeView
 import com.journeyapps.barcodescanner.BarcodeCallback
 import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.BarcodeView
@@ -127,6 +130,8 @@ class QRView(private val registrar: PluginRegistry.Registrar, id: Int) :
 //        val height = Resources.getSystem().displayMetrics.heightPixels
 //        val width = Resources.getSystem().displayMetrics.widthPixels
 //        barcode.framingRectSize = Size(width, height)
+        val formats = listOf(BarcodeFormat.EAN_13, BarcodeFormat.UPC_A)
+        barcode.decoderFactory = DefaultDecoderFactory(formats)
         barcode.decodeContinuous(
                 object : BarcodeCallback {
                     override fun barcodeResult(result: BarcodeResult) {
