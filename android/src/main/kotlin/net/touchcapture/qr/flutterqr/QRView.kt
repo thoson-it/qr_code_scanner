@@ -124,12 +124,9 @@ class QRView(private val registrar: PluginRegistry.Registrar, id: Int) :
         return barcodeView
     }
 
+    private var previousBarcode: String = ""
     private fun createBarCodeView(): BarcodeView? {
         val barcode = BarcodeView(registrar.activity())
-        //SonLT: no need this code
-//        val height = Resources.getSystem().displayMetrics.heightPixels
-//        val width = Resources.getSystem().displayMetrics.widthPixels
-//        barcode.framingRectSize = Size(width, height)
         val width = Resources.getSystem().displayMetrics.widthPixels
         val height = Resources.getSystem().displayMetrics.heightPixels
         barcode.framingRectSize = Size(width, height)
@@ -139,6 +136,13 @@ class QRView(private val registrar: PluginRegistry.Registrar, id: Int) :
                 object : BarcodeCallback {
                     override fun barcodeResult(result: BarcodeResult) {
                         result?.let {
+                            //Barcode valid must return >= 2 times
+                            if (previousBarcode != result.text) {
+                                previousBarcode = result.text
+                                return
+                            }
+                            previousBarcode = result.text
+                            //Read result
                             val density = Resources.getSystem().displayMetrics.density
                             val points = result.resultPoints
                             if (points.size >= 2) {
